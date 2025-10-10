@@ -1,0 +1,10 @@
+playwright>=1.47
+pydantic>=2.7
+fastapi>=0.115
+uvicorn>=0.30
+python-dotenv>=1.0
+rapidfuzz>=3.9
+tabulate>=0.9
+sqlalchemy>=2.0
+requests>=2.32
+selectolax>=0.3

@@ -1,0 +1,14 @@
+{
+    "name": "amazon",
+    "search_url": "https://www.amazon.in/s?k={query}",
+    "wait_selectors": [".s-main-slot [data-component-type='s-search-result']"],
+    "card": "[data-component-type='s-search-result']",
+    "sel_title": "h2 a span",
+    "sel_price": ".a-price-whole",
+    "sel_rating": "[aria-label*='out of 5 stars']",
+    "sel_link": "h2 a",
+    "sort": "price-asc",
+    "page_budget": 1,
+    "max_cards": 20
+  }
+  
