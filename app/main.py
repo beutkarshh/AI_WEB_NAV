@@ -100,12 +100,22 @@ def run(user_query: str, use_cache: bool = True):
         # 6) Extract raw items
         raw = extract_items(pages)
 
-        # 7) Normalize + validate + dedup + DB insert
+        # 7) Normalize + validate + dedup + budget filter + DB insert
         rows, seen = [], set()
+        filtered_count = 0
+        budget_filtered = 0
+        max_price = intent.get("max_price")
+        
         for r in raw:
             price = parse_inr(r.get("price_txt"))
             title = r.get("title", "")
             if not title or price <= 0:
+                filtered_count += 1
+                continue
+            
+            # Apply budget filter if specified
+            if max_price and price > max_price:
+                budget_filtered += 1
                 continue
 
             tnorm = normalize_title(title)
@@ -139,10 +149,30 @@ def run(user_query: str, use_cache: bool = True):
                 item_hash(r["site"], tnorm, price),
             )
 
-        # 8) Simple rank (single-site for now): rating desc, then price asc
-        rows.sort(key=lambda x: (-(x["rating"]), x["price_inr"]))
-        top5 = rows[:5]
-        print_table(top5)
+        budget_msg = f", Budget filtered (>{max_price}): {budget_filtered}" if max_price else ""
+        print(f"[debug] Raw items: {len(raw)}, Filtered out: {filtered_count}{budget_msg}, Valid rows: {len(rows)}")
+
+        # 8) Multi-site ranking: get top 5 from each site
+        sites = {}
+        for row in rows:
+            site_name = row["site"]
+            if site_name not in sites:
+                sites[site_name] = []
+            sites[site_name].append(row)
+        
+        # Sort each site's results from high price to low price
+        top_results = []
+        for site_name, site_rows in sites.items():
+            # Sort by: rating desc (primary), then price desc (high to low)
+            site_rows.sort(key=lambda x: (-(x["rating"]), -(x["price_inr"])))
+            
+            top_site_results = site_rows[:5]  # Top 5 from each site
+            top_results.extend(top_site_results)
+            print(f"[{site_name}] Found {len(site_rows)} items, showing top {len(top_site_results)}")
+        
+        # Sort combined results by rating desc, then price desc (high to low)
+        top_results.sort(key=lambda x: (-(x["rating"]), -(x["price_inr"])))
+        print_table(top_results)
 
         # 9) Optional: write minimal artifacts + populate cache
         # Write JSON artifacts locally regardless (handy for inspection)
@@ -151,7 +181,7 @@ def run(user_query: str, use_cache: bool = True):
         with results_path.open("w", encoding="utf-8") as f:
             json.dump(rows, f, ensure_ascii=False)
         with top5_path.open("w", encoding="utf-8") as f:
-            json.dump(top5, f, ensure_ascii=False)
+            json.dump(top_results, f, ensure_ascii=False)
 
         # If cache manager exists, store artifacts under a fingerprinted name
         if use_cache and cache_store is not None:
@@ -161,7 +191,7 @@ def run(user_query: str, use_cache: bool = True):
                 intent=intent,
                 run_id=run_id,
                 results=rows,
-                top5=top5,
+                top5=top_results,
                 csv_path=str(ART_DIR / "results_latest.csv"),  # fill later if/when you export CSV
                 res_path=str(results_path),
                 top5_path=str(top5_path),

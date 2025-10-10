@@ -1,0 +1,16 @@
+{
+  "name": "flipkart",
+  "search_url": "https://www.flipkart.com/search?q={query}&sort=relevance&as=on&as-show=on",
+  "wait_selectors": ["[data-id]", "._13oc-S"],
+  "card": "[data-id], ._13oc-S",
+
+  "sel_title": ".KzDlHZ, ._4rR01T, .IRpwTa, .s1Q9rs",
+  "sel_link": "a",
+  "sel_price": "._30jeq3, ._1_WHN1, .Nx9bqj", 
+  "sel_price_alt": "._25b18c",
+  "sel_rating": "._3LWZlK, .XQDdHH, ._3LWZlK",
+
+  "sort": "price-asc",
+  "page_budget": 1,
+  "max_cards": 24
+}

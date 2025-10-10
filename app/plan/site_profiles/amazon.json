@@ -2,9 +2,9 @@
   "name": "amazon",
   "search_url": "https://www.amazon.in/s?k={query}",
   "wait_selectors": [".s-main-slot"],
-  "card": ".s-result-item[data-asin]:not([data-asin=''])",
+  "card": "[data-asin]:not([data-asin='']), .s-result-item",
 
-  "sel_title": "h2 a span",
+  "sel_title": "h2 a span, h2 span, [data-cy='title-recipe-title'], .a-size-medium span, .a-size-base-plus",
   "sel_link": "h2 a",
   "sel_price": ".a-price .a-offscreen", 
   "sel_price_alt": ".a-price-whole",
