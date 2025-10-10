@@ -1,16 +1,23 @@
 {
-  "name": "flipkart",
-  "search_url": "https://www.flipkart.com/search?q={query}&sort=relevance&as=on&as-show=on",
-  "wait_selectors": ["[data-id]", "._13oc-S"],
-  "card": "[data-id], ._13oc-S",
-
-  "sel_title": ".KzDlHZ, ._4rR01T, .IRpwTa, .s1Q9rs",
-  "sel_link": "a",
-  "sel_price": "._30jeq3, ._1_WHN1, .Nx9bqj", 
-  "sel_price_alt": "._25b18c",
-  "sel_rating": "._3LWZlK, .XQDdHH, ._3LWZlK",
-
-  "sort": "price-asc",
-  "page_budget": 1,
-  "max_cards": 24
+    "name": "flipkart",
+    "search_url": "https://www.flipkart.com/search?q={query}",
+    "pagination_url": "https://www.flipkart.com/search?q={query}&page={page}",
+    "max_pages": 1,
+    "min_items_per_page": 5,
+    "pagination_type": "button",
+    "price_filter_support": true,
+    "wait_selectors": ["div[data-id]"],
+    "card": "div[data-id]",
+    "sel_title": "a[title], .KzDlHZ, ._4rR01T, .s1Q9rs, [class*='title']",
+    "sel_link": "a[href*='/p/'], a[title], ._2rpwqI, ._1fQZEK, .CGtC98",
+    "sel_price": "._30jeq3, ._1_WHN1, ._3tbX2X, .Nx9bqj, ._4b5DiR, [class*='price'], [data-testid*='price']",
+    "sel_rating": "._3LWZlK, ._1lRcqv, .gUuXy-, [class*='rating']",
+    "selectors": {
+        "product_grid": "div[data-id]",
+        "product_link": "a[href*='/p/'], a[title], ._2rpwqI, ._1fQZEK, .CGtC98",
+        "title": "a[title], .KzDlHZ, ._4rR01T, .s1Q9rs, [class*='title']",
+        "price": "._30jeq3, ._1_WHN1, ._3tbX2X, .Nx9bqj, ._4b5DiR, [class*='price'], [data-testid*='price']",
+        "rating": "._3LWZlK, ._1lRcqv, .gUuXy-, [class*='rating']",
+        "next_page": "a._1LKTO3"
+    }
 }

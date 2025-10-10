@@ -1,0 +1,34 @@
+{
+  "name": "reliance",
+  "base_url": "https://www.reliancedigital.in/",
+  "search_url": "https://www.reliancedigital.in/search?q={query}",
+  "wait_selectors": [".product-grid", ".ProductListingPage", ".product-item", "body"],
+  "card": ".product-item, [data-testid='product-card'], .ProductCard, .pdp-product-card",
+
+  "selectors": {
+    "title": ".ProductCard__productName, .product-title, .product-name, h3, h4",
+    "link": "a",
+    "price": ".ProductCard__price, .price, .selling-price, .offer-price",
+    "price_alt": ".ProductCard__mrp, .mrp, .original-price",
+    "rating": ".ProductCard__rating, .rating, .star-rating"
+  },
+
+  "debug": {
+    "screenshot": true,
+    "html_dump": false,
+    "page_analysis": true
+  },
+
+  "sort": "relevance",
+  "page_budget": 1,
+  "max_cards": 24,
+  "anti_bot": {
+    "stealth": true,
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": {"width": 1920, "height": 1080},
+    "extra_headers": {
+      "Accept-Language": "en-US,en;q=0.9,hi;q=0.8",
+      "Accept-Encoding": "gzip, deflate, br"
+    }
+  }
+}

@@ -1,16 +1,19 @@
 {
-  "name": "amazon",
-  "search_url": "https://www.amazon.in/s?k={query}",
-  "wait_selectors": [".s-main-slot"],
-  "card": "[data-asin]:not([data-asin='']), .s-result-item",
-
-  "sel_title": "h2 a span, h2 span, [data-cy='title-recipe-title'], .a-size-medium span, .a-size-base-plus",
-  "sel_link": "h2 a",
-  "sel_price": ".a-price .a-offscreen", 
-  "sel_price_alt": ".a-price-whole",
-  "sel_rating": ".a-icon-alt",
-
-  "sort": "price-asc",
-  "page_budget": 1,
-  "max_cards": 24
+    "name": "amazon",
+    "search_url": "https://www.amazon.in/s?k={query}",
+    "pagination_url": "https://www.amazon.in/s?k={query}&page={page}",
+    "max_pages": 1,
+    "min_items_per_page": 5,
+    "pagination_type": "button",
+    "price_filter_support": true,
+    "wait_selectors": ["div[data-component-type='s-search-result']"],
+    "card": "div[data-component-type='s-search-result']",
+    "selectors": {
+        "product_grid": "div[data-component-type='s-search-result']",
+        "product_link": "h2 a",
+        "title": "h2 span",
+        "price": "span.a-price-whole",
+        "rating": "span.a-icon-alt",
+        "next_page": "a[aria-label='Go to next page']"
+    }
 }

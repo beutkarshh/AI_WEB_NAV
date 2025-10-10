@@ -32,12 +32,13 @@ def extract_items(pages):
         print(f"[debug] Page analysis for {site_name}: {debug_info}")
         
         # Use site-specific selectors from configuration
+        selectors_config = site.get("selectors", {})
         card_selector = site.get("card", "[data-asin]:not([data-asin=''])")
-        title_selector = site.get("sel_title", "h2 a span")
-        link_selector = site.get("sel_link", "h2 a")
-        price_selector = site.get("sel_price", ".a-price .a-offscreen")
+        title_selector = selectors_config.get("title", site.get("sel_title", "h2 a span"))
+        link_selector = selectors_config.get("product_link", site.get("sel_link", "h2 a"))
+        price_selector = selectors_config.get("price", site.get("sel_price", ".a-price .a-offscreen"))
         price_alt_selector = site.get("sel_price_alt", ".a-price-whole")
-        rating_selector = site.get("sel_rating", ".a-icon-alt")
+        rating_selector = selectors_config.get("rating", site.get("sel_rating", ".a-icon-alt"))
         
         # use evaluate for speed with site-specific selectors
         selectors = {
@@ -119,5 +120,23 @@ def extract_items(pages):
                 print(f"[debug] Could not dump {site_name} content: {e}")
 
         print(f"[{site['name']}] cards={len(data)} kept={len(fixed)}")
+        
+        # Debug: Print first few extracted items for Flipkart
+        if site_name == "flipkart" and len(fixed) > 0:
+            print(f"[debug] First 3 Flipkart items:")
+            for i, item in enumerate(fixed[:3]):
+                print(f"  {i+1}. Title: '{item['title'][:50]}...' Price: '{item['price_txt']}' URL: '{item['url'][:50]}...'")
+            
+            # Force dump if no prices found
+            empty_prices = sum(1 for item in fixed if not item['price_txt'])
+            if empty_prices > len(fixed) * 0.8:  # If 80% of items have no price
+                print(f"[debug] {empty_prices}/{len(fixed)} Flipkart items missing prices, creating dump...")
+                try:
+                    slot_html = page.locator("div[data-id]").first.inner_html(timeout=5000)
+                    Path(f"data/artifacts/flipkart_price_debug.html").write_text(slot_html, encoding="utf-8")
+                    print(f"[debug] Wrote data/artifacts/flipkart_price_debug.html")
+                except Exception as e:
+                    print(f"[debug] Could not dump Flipkart price debug: {e}")
+        
         results.extend(fixed)
     return results

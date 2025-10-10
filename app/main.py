@@ -69,13 +69,15 @@ def _ollama_intent_or_fallback(user_text: str) -> dict:
 
 
 # -------- Main pipeline --------
-def run(user_query: str, use_cache: bool = True):
+def run(user_query: str, use_cache: bool = True, mode: str = "quick", max_pages: int = 1):
     init_db()
 
     # 1) Intent (Ollama if available)
     intent = _ollama_intent_or_fallback(user_query)
-    # Add original query for AI site selection
+    # Add original query and search parameters for plan building
     intent["query"] = user_query
+    intent["search_mode"] = mode
+    intent["max_pages"] = max_pages
 
     # 2) Optional: Query cache (instant for repeat demos)
     if use_cache and cache_lookup is not None:
@@ -87,8 +89,8 @@ def run(user_query: str, use_cache: bool = True):
             print_table(top5)
             return
 
-    # 3) Plan sites
-    plan = build_plan(intent)
+    # 3) Plan sites with mode and pagination settings
+    plan = build_plan(intent, mode=mode, max_pages=max_pages)
 
     # 4) Create run
     run_id = new_run_id()
@@ -154,7 +156,7 @@ def run(user_query: str, use_cache: bool = True):
         budget_msg = f", Budget filtered (>{max_price}): {budget_filtered}" if max_price else ""
         print(f"[debug] Raw items: {len(raw)}, Filtered out: {filtered_count}{budget_msg}, Valid rows: {len(rows)}")
 
-        # 8) Multi-site ranking: get top 5 from each site
+        # 8) Process results based on search mode
         sites = {}
         for row in rows:
             site_name = row["site"]
@@ -162,43 +164,75 @@ def run(user_query: str, use_cache: bool = True):
                 sites[site_name] = []
             sites[site_name].append(row)
         
-        # Sort each site's results from high price to low price
+        # Calculate totals for metadata
+        total_pages_scraped = plan.get("metadata", {}).get("estimated_total_pages", len(pages))
+        
+        # Sort each site's results and prepare display
         top_results = []
         for site_name, site_rows in sites.items():
             # Sort by: rating desc (primary), then price desc (high to low)
             site_rows.sort(key=lambda x: (-(x["rating"]), -(x["price_inr"])))
             
-            top_site_results = site_rows[:5]  # Top 5 from each site
+            if mode == "deep":
+                # Deep mode: show ALL results from each site (no limit)
+                top_site_results = site_rows  # Show ALL items found
+                print(f"[{site_name}] 🔍 Deep search found {len(site_rows)} items (showing ALL {len(site_rows)} results)")
+            else:
+                # Quick mode: traditional top 5 per site
+                display_count = min(5, len(site_rows))
+                top_site_results = site_rows[:display_count]
+                print(f"[{site_name}] Found {len(site_rows)} items, showing top {display_count}")
+            
             top_results.extend(top_site_results)
-            print(f"[{site_name}] Found {len(site_rows)} items, showing top {len(top_site_results)}")
         
         # Sort combined results by rating desc, then price desc (high to low)
         top_results.sort(key=lambda x: (-(x["rating"]), -(x["price_inr"])))
+        
+        # Print search summary for deep mode
+        if mode == "deep":
+            print(f"\n🚀 Deep Search Results Summary:")
+            print(f"   📊 Total items found: {len(rows)}")
+            print(f"   📄 Pages scraped: {total_pages_scraped}")
+            print(f"   🏪 Sites searched: {len(sites)}")
+            print(f"   💾 Items stored in database: {len(rows)}")
+            print(f"   🎯 Displaying all {len(top_results)} qualifying results:\n")
+        
+        # Display all results (no limit)
         print_table(top_results)
 
-        # 9) Optional: write minimal artifacts + populate cache
+        # 9) Optional: write comprehensive artifacts + populate cache
         # Write JSON artifacts locally regardless (handy for inspection)
         results_path = ART_DIR / "results_latest.json"
-        top5_path = ART_DIR / "top5_latest.json"
+        display_results_path = ART_DIR / "display_results_latest.json"
         with results_path.open("w", encoding="utf-8") as f:
-            json.dump(rows, f, ensure_ascii=False)
-        with top5_path.open("w", encoding="utf-8") as f:
-            json.dump(top_results, f, ensure_ascii=False)
+            json.dump(rows, f, ensure_ascii=False)  # All scraped items
+        with display_results_path.open("w", encoding="utf-8") as f:
+            json.dump(top_results, f, ensure_ascii=False)  # All displayed items
 
         # If cache manager exists, store artifacts under a fingerprinted name
         if use_cache and cache_store is not None:
-            # We'll pass explicit paths so the cache index knows where they live
-            # CSV path is optional here; pass an empty string if you don't write CSV yet
             cache_store(
                 intent=intent,
                 run_id=run_id,
                 results=rows,
                 top5=top_results,
-                csv_path=str(ART_DIR / "results_latest.csv"),  # fill later if/when you export CSV
+                csv_path=str(ART_DIR / "results_latest.csv"),
                 res_path=str(results_path),
-                top5_path=str(top5_path),
-                ttl_sec=0  # 0 => treat as non-expiring for demo; change later if you want
+                top5_path=str(display_results_path),
+                ttl_sec=0
             )
+
+        # Return structured data for API consumption
+        return {
+            "items": top_results,
+            "sites_used": list(sites.keys()),
+            "total_pages_scraped": total_pages_scraped,
+            "items_stored_in_db": len(rows),
+            "budget_filtered": budget_filtered,
+            "total_raw_items": len(raw),
+            "search_mode": mode,
+            "max_pages_per_site": max_pages
+        }
 
     finally:
         # 10) Clean up Playwright
@@ -217,4 +251,33 @@ def run(user_query: str, use_cache: bool = True):
 
 
 if __name__ == "__main__":
-    run(sys.argv[1] if len(sys.argv) > 1 else "phones under 20000 5g samsung")
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='AI Web Navigation - Smart Product Search')
+    parser.add_argument('query', help='Search query (e.g., "laptops under 50000")')
+    parser.add_argument('--mode', choices=['quick', 'deep'], default='quick',
+                       help='Search mode: quick (top 5 products) or deep (multiple pages)')
+    parser.add_argument('--max-pages', type=int, default=7, 
+                       help='Maximum pages per site in deep mode (default: 7, max: 25)')
+    parser.add_argument('--no-cache', action='store_true', help='Disable cache')
+    
+    args = parser.parse_args()
+    
+    # Validate max pages
+    if args.max_pages > 25:
+        print("⚠️  Maximum pages capped at 25 for performance reasons")
+        args.max_pages = 25
+    
+    print(f"🔍 Searching for: {args.query}")
+    if args.mode == "deep":
+        print(f"🔧 Deep Search Mode: Will scrape up to {args.max_pages} pages per site")
+        print(f"⏱️  Estimated time: {args.max_pages * 2} sites × {args.max_pages} pages × 5s = ~{args.max_pages * 2 * args.max_pages * 5}s")
+    else:
+        print(f"⚡ Quick Search Mode: Top products from first page only (~15s)")
+    
+    run(
+        args.query,
+        use_cache=not args.no_cache,
+        mode=args.mode,
+        max_pages=args.max_pages
+    )

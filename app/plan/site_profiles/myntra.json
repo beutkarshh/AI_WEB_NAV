@@ -1,16 +1,18 @@
 {
-  "name": "myntra",
-  "search_url": "https://www.myntra.com/search?q={query}&sort=relevance",
-  "wait_selectors": [".search-searchProductsContainer", ".product-base"],
-  "card": ".product-base, li[class*='product-base']",
-
-  "sel_title": ".product-product, .product-brand, h3, h4, .product-productMetaInfo h3",
-  "sel_link": "a",
-  "sel_price": ".product-discountedPrice, .product-price, .price-price", 
-  "sel_price_alt": ".product-strike, .price-mrp",
-  "sel_rating": ".product-ratingsContainer span, .ratings-rating",
-
-  "sort": "relevance",
-  "page_budget": 1,
-  "max_cards": 24
+    "name": "myntra",
+    "search_url": "https://www.myntra.com/{query}",
+    "pagination_url": "https://www.myntra.com/{query}?p={page}",
+    "max_pages": 1,
+    "min_items_per_page": 5,
+    "pagination_type": "button",
+    "price_filter_support": true,
+    "wait_selectors": [".product-base"],
+    "card": ".product-base",
+    "title": ".product-brand, .product-product",
+    "price": ".product-discountedPrice",
+    "rating": ".product-rating",
+    "url": ".product-base a",
+    "next_button": ".pagination-next",
+    "item_timeout": 10000,
+    "page_timeout": 30000
 }
