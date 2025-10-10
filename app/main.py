@@ -74,6 +74,8 @@ def run(user_query: str, use_cache: bool = True):
 
     # 1) Intent (Ollama if available)
     intent = _ollama_intent_or_fallback(user_query)
+    # Add original query for AI site selection
+    intent["query"] = user_query
 
     # 2) Optional: Query cache (instant for repeat demos)
     if use_cache and cache_lookup is not None:

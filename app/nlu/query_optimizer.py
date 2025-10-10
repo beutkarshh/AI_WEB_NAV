@@ -36,6 +36,15 @@ Flipkart India search optimization rules:
   - Budget <15000: use basic terms
 - Flipkart responds well to specific model hints
 - Examples: "samsung smartphone premium", "dell laptop business", "oneplus mobile flagship"
+""",
+            "myntra": """
+Myntra fashion search optimization rules:
+- Focus on fashion-specific terms: "men shirts", "women dress", "kids shoes"
+- Include brand names prominently for fashion items
+- Use style descriptors: "casual", "formal", "ethnic", "western"
+- Be specific about clothing types: "kurta", "jeans", "saree", "sneakers"
+- Add gender/age targeting: "men", "women", "boys", "girls"
+- Examples: "levis jeans men", "zara dress women", "nike sneakers", "ethnic kurta men"
 """
         }
         
