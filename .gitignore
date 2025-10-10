@@ -6,3 +6,13 @@ data/artifacts/
 data/snapshots/
 venv/
 playwright/
+data/artifacts/
+data/cache/
+data/snapshots/
+.playwright/
+playwright-report/
+test-results/
+venv/
+ni data\artifacts\.gitkeep -Force
+ni data\cache\.gitkeep -Force
+ni data\snapshots\.gitkeep -Force

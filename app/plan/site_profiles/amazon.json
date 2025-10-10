@@ -1,0 +1,16 @@
+{
+  "name": "amazon",
+  "search_url": "https://www.amazon.in/s?k={query}",
+  "wait_selectors": [".s-main-slot"],
+  "card": ".s-result-item[data-asin]:not([data-asin=''])",
+
+  "sel_title": "h2 a span",
+  "sel_link": "h2 a",
+  "sel_price": ".a-price .a-offscreen", 
+  "sel_price_alt": ".a-price-whole",
+  "sel_rating": ".a-icon-alt",
+
+  "sort": "price-asc",
+  "page_budget": 1,
+  "max_cards": 24
+}
