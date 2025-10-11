@@ -1,0 +1,119 @@
+{
+  "job_id": "sample_wikipedia_movies",
+  "description": "Sample Wikipedia Movies Collection (Last 20 Years)",
+  "created_at": "2025-10-10T23:55:00.000000",
+  "total_movies": 5,
+  "movies": [
+    {
+      "id": 1,
+      "url": "https://en.wikipedia.org/wiki/Avatar:_The_Way_of_Water",
+      "title": "Avatar: The Way of Water",
+      "year": 2022,
+      "shard_file": "data/wiki_jobs/sample/movies_2022.jsonl",
+      "raw_data": {
+        "title": "Avatar: The Way of Water",
+        "year": 2022,
+        "director": "James Cameron",
+        "genre": ["Action", "Adventure", "Fantasy"],
+        "budget": "$350-460 million",
+        "box_office": "$2.32 billion",
+        "runtime": "192 minutes",
+        "rating": "7.6/10",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Avatar:_The_Way_of_Water",
+        "plot": "Set more than a decade after the events of the first film, Avatar: The Way of Water begins to tell the story of the Sully family (Jake, Neytiri, and their kids), the trouble that follows them, the lengths they go to keep each other safe, the battles they fight to stay alive, and the tragedies they endure.",
+        "cast": ["Sam Worthington", "Zoe Saldana", "Sigourney Weaver", "Stephen Lang"],
+        "production_companies": ["20th Century Studios", "Lightstorm Entertainment"],
+        "distributed_by": "20th Century Studios"
+      }
+    },
+    {
+      "id": 2,
+      "url": "https://en.wikipedia.org/wiki/Top_Gun:_Maverick",
+      "title": "Top Gun: Maverick",
+      "year": 2022,
+      "shard_file": "data/wiki_jobs/sample/movies_2022.jsonl",
+      "raw_data": {
+        "title": "Top Gun: Maverick",
+        "year": 2022,
+        "director": "Joseph Kosinski",
+        "genre": ["Action", "Drama"],
+        "budget": "$170 million",
+        "box_office": "$1.49 billion",
+        "runtime": "130 minutes",
+        "rating": "8.3/10",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Top_Gun:_Maverick",
+        "plot": "After thirty years, Maverick is still pushing the envelope as a top naval aviator, but must confront ghosts of his past when he leads TOP GUN's elite graduates on a mission that demands the ultimate sacrifice from those chosen to fly it.",
+        "cast": ["Tom Cruise", "Miles Teller", "Jennifer Connelly", "Jon Hamm"],
+        "production_companies": ["Paramount Pictures", "Skydance Media"],
+        "distributed_by": "Paramount Pictures"
+      }
+    },
+    {
+      "id": 3,
+      "url": "https://en.wikipedia.org/wiki/Spider-Man:_No_Way_Home",
+      "title": "Spider-Man: No Way Home",
+      "year": 2021,
+      "shard_file": "data/wiki_jobs/sample/movies_2021.jsonl",
+      "raw_data": {
+        "title": "Spider-Man: No Way Home",
+        "year": 2021,
+        "director": "Jon Watts",
+        "genre": ["Action", "Adventure", "Fantasy"],
+        "budget": "$200 million",
+        "box_office": "$1.92 billion",
+        "runtime": "148 minutes",
+        "rating": "8.2/10",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Spider-Man:_No_Way_Home",
+        "plot": "With Spider-Man's identity now revealed, Peter asks Doctor Strange for help. When a spell goes wrong, dangerous foes from other worlds start to appear, forcing Peter to discover what it truly means to be Spider-Man.",
+        "cast": ["Tom Holland", "Zendaya", "Benedict Cumberbatch", "Jacob Batalon"],
+        "production_companies": ["Columbia Pictures", "Marvel Studios"],
+        "distributed_by": "Sony Pictures Releasing"
+      }
+    },
+    {
+      "id": 4,
+      "url": "https://en.wikipedia.org/wiki/Dune_(2021_film)",
+      "title": "Dune",
+      "year": 2021,
+      "shard_file": "data/wiki_jobs/sample/movies_2021.jsonl",
+      "raw_data": {
+        "title": "Dune",
+        "year": 2021,
+        "director": "Denis Villeneuve",
+        "genre": ["Action", "Adventure", "Drama"],
+        "budget": "$165 million",
+        "box_office": "$402 million",
+        "runtime": "155 minutes",
+        "rating": "8.0/10",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Dune_(2021_film)",
+        "plot": "Paul Atreides, a brilliant and gifted young man born into a great destiny beyond his understanding, must travel to the most dangerous planet in the universe to ensure the future of his family and his people.",
+        "cast": ["Timothée Chalamet", "Rebecca Ferguson", "Oscar Isaac", "Josh Brolin"],
+        "production_companies": ["Legendary Entertainment", "Warner Bros. Pictures"],
+        "distributed_by": "Warner Bros. Pictures"
+      }
+    },
+    {
+      "id": 5,
+      "url": "https://en.wikipedia.org/wiki/No_Time_to_Die",
+      "title": "No Time to Die",
+      "year": 2021,
+      "shard_file": "data/wiki_jobs/sample/movies_2021.jsonl",
+      "raw_data": {
+        "title": "No Time to Die",
+        "year": 2021,
+        "director": "Cary Joji Fukunaga",
+        "genre": ["Action", "Adventure", "Thriller"],
+        "budget": "$250 million",
+        "box_office": "$774 million",
+        "runtime": "163 minutes",
+        "rating": "7.3/10",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/No_Time_to_Die",
+        "plot": "James Bond has left active service. His peace is short-lived when Felix Leiter, an old friend from the CIA, turns up asking for help, leading Bond onto the trail of a mysterious villain armed with dangerous new technology.",
+        "cast": ["Daniel Craig", "Rami Malek", "Léa Seydoux", "Lashana Lynch"],
+        "production_companies": ["Eon Productions", "Metro-Goldwyn-Mayer"],
+        "distributed_by": "United Artists Releasing"
+      }
+    }
+  ]
+}
+

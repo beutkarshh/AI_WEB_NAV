@@ -4,9 +4,14 @@ RESTful API endpoints for managing long-running Wikipedia scraping jobs
 """
 
 from fastapi import APIRouter, HTTPException, Query
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from datetime import datetime
+import json
+import csv
+import io
+from pathlib import Path
 
 from app.wiki.orchestrator import orchestrator
 
@@ -124,30 +129,219 @@ async def pause_job(job_id: str):
     else:
         raise HTTPException(status_code=400, detail="Failed to pause job (may not be running)")
 
+@wiki_router.get("/jobs/demo/download/{file_type}")
+async def download_demo_results(file_type: str):
+    """
+    Download demo results in different formats for testing
+    
+    file_type: 'json', 'jsonl', or 'csv'
+    """
+    if file_type not in ['json', 'jsonl', 'csv']:
+        raise HTTPException(status_code=400, detail="file_type must be 'json', 'jsonl', or 'csv'")
+    
+    try:
+        # Load sample data
+        sample_file = Path("data/sample_wikipedia_movies.json")
+        if not sample_file.exists():
+            raise HTTPException(status_code=404, detail="Sample data not found")
+        
+        with open(sample_file, 'r', encoding='utf-8') as f:
+            sample_data = json.load(f)
+        
+        results = sample_data.get('movies', [])
+        
+        if not results:
+            raise HTTPException(status_code=404, detail="No sample results found")
+        
+        # Create filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"wikipedia_movies_demo_{timestamp}.{file_type}"
+        
+        if file_type == 'json':
+            # Create JSON file
+            json_data = {
+                "job_id": "demo_wikipedia_movies",
+                "description": "Demo Wikipedia Movies Collection (Last 20 Years)",
+                "created_at": datetime.now().isoformat(),
+                "total_movies": len(results),
+                "movies": results
+            }
+            
+            # Create temporary file
+            temp_file = Path(f"/tmp/{filename}")
+            with open(temp_file, 'w', encoding='utf-8') as f:
+                json.dump(json_data, f, indent=2, ensure_ascii=False)
+            
+            return FileResponse(
+                temp_file,
+                media_type='application/json',
+                filename=filename
+            )
+            
+        elif file_type == 'csv':
+            # Create CSV file
+            temp_file = Path(f"/tmp/{filename}")
+            
+            with open(temp_file, 'w', newline='', encoding='utf-8') as f:
+                if results:
+                    # Get all possible fields from the first result
+                    fieldnames = set()
+                    for movie in results:
+                        if isinstance(movie.get('raw_data'), dict):
+                            fieldnames.update(movie['raw_data'].keys())
+                    
+                    # Standard fields
+                    fieldnames.update(['id', 'url', 'title', 'year', 'shard_file'])
+                    fieldnames = sorted(list(fieldnames))
+                    
+                    writer = csv.DictWriter(f, fieldnames=fieldnames)
+                    writer.writeheader()
+                    
+                    for movie in results:
+                        row = {
+                            'id': movie.get('id'),
+                            'url': movie.get('url'),
+                            'title': movie.get('title'),
+                            'year': movie.get('year'),
+                            'shard_file': movie.get('shard_file')
+                        }
+                        
+                        # Add raw data fields
+                        if isinstance(movie.get('raw_data'), dict):
+                            row.update(movie['raw_data'])
+                        
+                        writer.writerow(row)
+            
+            return FileResponse(
+                temp_file,
+                media_type='text/csv',
+                filename=filename
+            )
+            
+        else:  # jsonl
+            # Create JSONL file
+            temp_file = Path(f"/tmp/{filename}")
+            
+            with open(temp_file, 'w', encoding='utf-8') as f:
+                for movie in results:
+                    json.dump(movie, f, ensure_ascii=False)
+                    f.write('\n')
+            
+            return FileResponse(
+                temp_file,
+                media_type='application/x-jsonlines',
+                filename=filename
+            )
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create demo download file: {str(e)}")
+
 @wiki_router.get("/jobs/{job_id}/download/{file_type}")
 async def download_results(job_id: str, file_type: str):
     """
     Download job results in different formats
     
-    file_type: 'json' or 'jsonl'
+    file_type: 'json', 'jsonl', or 'csv'
     """
-    if file_type not in ['json', 'jsonl']:
-        raise HTTPException(status_code=400, detail="file_type must be 'json' or 'jsonl'")
+    if file_type not in ['json', 'jsonl', 'csv']:
+        raise HTTPException(status_code=400, detail="file_type must be 'json', 'jsonl', or 'csv'")
     
     job_data = orchestrator.get_job_progress(job_id)
     if not job_data:
         raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
     
-    # This would implement actual file download
-    # For now, return a message about where to find the files
-    data_folder = job_data.get('data_folder', 'Unknown')
+    if job_data.get('status') != 'completed':
+        raise HTTPException(status_code=400, detail="Job must be completed to download results")
     
-    return {
-        "job_id": job_id,
-        "file_type": file_type,
-        "message": f"Results available in: {data_folder}",
-        "note": "Download functionality would be implemented here"
-    }
+    try:
+        # Get all results for this job
+        results = orchestrator.get_job_results(job_id, limit=10000)  # Get up to 10k results
+        
+        if not results:
+            raise HTTPException(status_code=404, detail="No results found for this job")
+        
+        # Create filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"wikipedia_movies_{job_id}_{timestamp}.{file_type}"
+        
+        if file_type == 'json':
+            # Create JSON file
+            json_data = {
+                "job_id": job_id,
+                "description": job_data.get('description', ''),
+                "created_at": job_data.get('created_at', ''),
+                "total_movies": len(results),
+                "movies": results
+            }
+            
+            # Create temporary file
+            temp_file = Path(f"/tmp/{filename}")
+            with open(temp_file, 'w', encoding='utf-8') as f:
+                json.dump(json_data, f, indent=2, ensure_ascii=False)
+            
+            return FileResponse(
+                temp_file,
+                media_type='application/json',
+                filename=filename
+            )
+            
+        elif file_type == 'csv':
+            # Create CSV file
+            temp_file = Path(f"/tmp/{filename}")
+            
+            with open(temp_file, 'w', newline='', encoding='utf-8') as f:
+                if results:
+                    # Get all possible fields from the first result
+                    fieldnames = set()
+                    for movie in results:
+                        if isinstance(movie.get('raw_data'), dict):
+                            fieldnames.update(movie['raw_data'].keys())
+                    
+                    # Standard fields
+                    fieldnames.update(['id', 'url', 'title', 'year', 'shard_file'])
+                    fieldnames = sorted(list(fieldnames))
+                    
+                    writer = csv.DictWriter(f, fieldnames=fieldnames)
+                    writer.writeheader()
+                    
+                    for movie in results:
+                        row = {
+                            'id': movie.get('id'),
+                            'url': movie.get('url'),
+                            'title': movie.get('title'),
+                            'year': movie.get('year'),
+                            'shard_file': movie.get('shard_file')
+                        }
+                        
+                        # Add raw data fields
+                        if isinstance(movie.get('raw_data'), dict):
+                            row.update(movie['raw_data'])
+                        
+                        writer.writerow(row)
+            
+            return FileResponse(
+                temp_file,
+                media_type='text/csv',
+                filename=filename
+            )
+            
+        else:  # jsonl
+            # Create JSONL file
+            temp_file = Path(f"/tmp/{filename}")
+            
+            with open(temp_file, 'w', encoding='utf-8') as f:
+                for movie in results:
+                    json.dump(movie, f, ensure_ascii=False)
+                    f.write('\n')
+            
+            return FileResponse(
+                temp_file,
+                media_type='application/x-jsonlines',
+                filename=filename
+            )
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create download file: {str(e)}")
 
 # Health check for wiki system
 @wiki_router.get("/health")
