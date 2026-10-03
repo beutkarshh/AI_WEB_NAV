@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "ai_web_nav"
 version = "0.1.0"
-description = "Cross-site product browsing, extraction and ranking skeleton"
-authors = ["You <you@example.com>"]
+description = "LLM-driven shopping agent: natural-language product search across Amazon, Flipkart and Myntra"
+authors = ["Utkarsh Waghmare", "Aayush Angal"]
 
 [tool.poetry.dependencies]
 python = "^3.10"

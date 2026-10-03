@@ -1,18 +1,20 @@
+# Python
 __pycache__/
 *.pyc
-.env
-data/cache/
-data/artifacts/
-data/snapshots/
 venv/
+.venv/
+.env
+
+# Playwright
 playwright/
-data/artifacts/
-data/cache/
-data/snapshots/
 .playwright/
 playwright-report/
 test-results/
-venv/
-ni data\artifacts\.gitkeep -Force
-ni data\cache\.gitkeep -Force
-ni data\snapshots\.gitkeep -Force
+
+# Runtime data
+data/cache/
+data/artifacts/
+data/snapshots/
+data/wiki_jobs/
+*.db
+*.log
